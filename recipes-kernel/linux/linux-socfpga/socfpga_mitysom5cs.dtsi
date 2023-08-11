@@ -1,0 +1,182 @@
+/dts-v1/;
+#include "socfpga.dtsi"
+/ {
+	model = "MitySOM-5CSX Altera SOCFPGA Cyclone V";
+	compatible = "altr,socfpga-cyclone5", "altr,socfpga";
+
+	chosen { };
+
+	soc {
+		clkmgr@ffd04000 {
+			clocks {
+				osc1 {
+					clock-frequency = <25000000>;
+				};
+			};
+		};
+
+		hps_lw_bus: bus@0ff200000 {
+			compatible = "simple-bus";
+			reg = <0xFF200000 0x00200000>;
+			#address-cells = <1>;
+			#size-cells = <1>;
+			ranges = <0x0 0xFF200000 0x00200000>;
+			status = "disabled";
+		};
+
+		regulator_3_3v: 3-3-v-regulator{
+			compatible = "regulator-fixed";
+			regulator-name = "3.3V";
+			regulator-min-microvolt = <3300000>;
+			regulator-max-microvolt = <3300000>;
+		};
+
+		gpio@ff708000 {
+			status = "okay";
+		};
+
+		gpio@ff709000 {
+			status = "okay";
+		}; 
+		gpio@ff70a000 {
+			status = "okay";
+		};
+
+		qspi: spi@ff705000 {
+			status = "okay";
+			flash0: nor@0 {
+				#address-cells = <1>;
+				#size-cells = <1>;
+				compatible = "n25q128a11", "jedec,spi-nor";
+				reg = <0>;      /* chip select */
+				spi-max-frequency = <108000000>;
+				m25p,fast-read;
+				page-size = <256>;
+				block-size = <16>; /* 2^16, 64KB */
+				cdns,read-delay = <4>;  /* delay value in read data capture register */
+				cdns,tshsl-ns = <50>;
+				cdns,tsd2d-ns = <50>;
+				cdns,tchsh-ns = <4>;
+				cdns,tslch-ns = <4>;
+
+				partition@qspi-preloader {
+					/* 64 KB for preloader image 0-3. */
+					label = "Preloader Image 0-3";
+					reg = <0x0 0x40000>;
+				};
+				partition@qspi-ubootenv {
+					/* 64 KB for u-Boot Env. */
+					label = "U-Boot Env";
+					reg = <0x40000 0x10000>;
+				};
+				partition@qspi-dtb {
+					/* 64 KB for DTB */
+					label = "DTB";
+					reg = <0x50000 0x10000>;
+				};
+				partition@qspi-uboot {
+					/* 512 KB for U-Boot */
+					label = "U-Boot";
+					reg = <0x60000 0x80000>;
+				};
+				partition@qspi-kernel {
+					/* 8 MB for Kernel */
+					label = "Kernel";
+					reg = <0xE0000 0x800000>;
+				};
+				partition@qspi-rootfs {
+					/* 7.125 MB for jffs2 data. */
+					label = "FPGA";
+					reg = <0x8E0000 0x720000>;
+				};
+			};
+
+		};
+
+		timer0@ffc08000 {
+			clock-frequency = <100000000>;
+		};
+
+		timer1@ffc09000 {
+			clock-frequency = <100000000>;
+		};
+
+		timer2@ffd00000 {
+			clock-frequency = <25000000>;
+		};
+
+		timer3@ffd01000 {
+			clock-frequency = <25000000>;
+		};
+
+		serial0@ffc02000 {
+			clock-frequency = <100000000>;
+		};
+
+		serial1@ffc03000 {
+			clock-frequency = <100000000>;
+		};
+
+		sysmgr@ffd08000 {
+			cpu1-start-addr = <0xffd080c4>;
+		};
+
+
+		usb1: usb@ffb40000 {
+			compatible = "snps,dwc2-vbus-ext";
+			status = "okay";
+		};
+
+		watchdog0: watchdog@ffd02000 {
+			status = "okay";
+		};
+		
+		i2c0: i2c@ffc04000 {
+			speed-mode = <0>;
+			status = "okay";
+
+			led@30 {
+				compatible = "ti,lp5562";
+				reg = <0x30>;
+				clock-mode = /bits/8 <2>;
+
+				chan0 {
+					chan-name = "R";
+					led-cur = /bits/ 8 <0x20>;
+					max-cur = /bits/ 8 <0x60>;
+				};
+
+				chan1 {
+					chan-name = "G";
+					led-cur = /bits/ 8 <0x20>;
+					max-cur = /bits/ 8 <0x60>;
+				};
+
+				chan2 {
+					chan-name = "B";
+					led-cur = /bits/ 8 <0x20>;
+					max-cur = /bits/ 8 <0x60>;
+				};
+
+				chan3 {
+					chan-name = "G1";
+					led-cur = /bits/ 8 <0x20>;
+					max-cur = /bits/ 8 <0x60>;
+				};
+			};
+			temp@4C {
+				compatible = "lm73";
+				reg = <0x4C>;
+			};
+			eeprom@50 {
+				compatible = "fmd,24c16";
+				reg = <0x50>;
+			};
+			rtc0: rtc@69 {
+				device_type = "rtc";
+				compatible = "abracon,abx80x";
+				reg = <0x69>;
+			};
+		};
+	};
+};
