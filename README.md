@@ -1,1 +1,1 @@
-This layer depends on https://github.com/altera-opensource/meta-intel-fpga-refdes
+This layer depends on https://github.com/altera-opensource/meta-intel-fpga
