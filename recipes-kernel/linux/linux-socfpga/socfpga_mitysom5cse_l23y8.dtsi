@@ -1,4 +1,5 @@
 #include "socfpga_mitysom5cse.dtsi"
+#include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/interrupt-controller/irq.h>
 #include <dt-bindings/leds/common.h>
 
@@ -31,10 +32,17 @@
 &gmac1 {
 	status = "okay";
     phy-mode = "rgmii";
+	phy-addr = <0xffffffff>; /* probe for phy addr */
 
-    snps,reset-delays-us = <0 10000 1000000>;
+    snps,reset-delays-us = <0 10000 10000>;
     snps,reset-gpio = <&porta 28 1>;
     snps,reset-active-low;
+
+    mdio0: mdio@ff702000 {
+       	#address-cells = <1>;
+		#size-cells = <0>;
+	    compatible = "snps,dwmac-mdio";
+	};
 };
 
 

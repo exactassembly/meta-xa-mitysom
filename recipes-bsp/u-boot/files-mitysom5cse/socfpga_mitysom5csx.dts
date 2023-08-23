@@ -1,0 +1,59 @@
+#include "socfpga_mitysom5cse.dtsi"
+#include <dt-bindings/interrupt-controller/irq.h>
+
+/ {
+	aliases {
+		/* this allow the ethaddr uboot environmnet variable contents
+		 * to be added to the gmac1 device tree blob.
+		 */
+		ethernet0 = &gmac1;
+	};
+
+	gpio_keys {
+		compatible = "gpio-keys";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		/* GPIO 37 */
+		button@1 {
+			label = "Switch 1";
+			linux,code = <0x101>;
+			gpios = <&portb 8 1>;
+			debounce-interval = <100>;
+		};
+		/* GPIO 40 */
+		button@2 {
+			label = "Switch 2";
+			linux,code = <0x102>;
+			gpios = <&portb 11 1>;
+			debounce-interval = <100>;
+		};
+		/* GPIO 41 */
+		button@3 {
+			label = "Switch 3";
+			linux,code = <0x103>;
+			gpios = <&portb 12 1>;
+			debounce-interval = <100>;
+		};
+	};
+};
+
+&i2c1 {
+	speed-mode = <0>;
+	status = "okay";
+    /* Power Monitor */
+	ltc2945@6F {
+		compatible = "ltc2945";
+		reg = <0x6F>;
+    };
+};
+
+&mmc {
+	status = "okay";
+	num-slots = <1>;
+	broken-cd;
+	cap-mmc-highspeed;
+	cap-sd-highspeed;
+	altr,dw-mshc-ciu-div = <3>;
+	altr,dw-mshc-sdr-timing = <0 3>;
+	bus-width = <4>;
+};

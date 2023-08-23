@@ -1,11 +1,15 @@
 # Simple initramfs image suitable for booting the MitySOM5CSE
 #
 # 
-LICENSE = "BSD-3"
+SUMMARY = "Initramfs image supporting overlayfs"
+DESCRIPTION = "Small image capable of booting a MitySOM5 module entirely from \
+in-memory pseudo-root. U-Boot will load the kernel, FDT and the initramfs, \
+then an initscrip sets up the overlayfs and root-pivots to a non-writable \
+squashfs with small non-volatile storage using overlayfs."
 
-DESCRIPTION = "Small image capable of booting a device. The kernel includes \
-the Minimal RAM-based Initial Root Filesystem (initramfs), which finds the \
-first 'init' program more efficiently."
+LICENSE = "BSD-3"
+DEPENDS = "virtual/kernel"
+RDEPENDS:${PN} = "busybox"
 
 COMPATIBLE_MACHINE = "mitysom5cse"
 
@@ -16,10 +20,10 @@ INITRAMFS_SCRIPTS += "\
     "
 
 VIRTUAL-RUNTIME_dev_manager ?= "busybox-mdev"
+VIRTUAL-RUNTIME_init_manager = "busybox"
 
-PACKAGE_INSTALL = "\
+PACKAGE_INSTALL += "\
     ${INITRAMFS_SCRIPTS} \
-    initramfs-live-boot-tiny \
     packagegroup-core-boot \
     dropbear \
     ${VIRTUAL-RUNTIME_base-utils} \
@@ -28,17 +32,12 @@ PACKAGE_INSTALL = "\
     base-passwd \
     ${ROOTFS_BOOTSTRAP_INSTALL}"
 
-export IMAGE_BASENAME = "mitysom5cse-initramfs"
+export IMAGE_BASENAME = "initramfs"
 IMAGE_NAME_SUFFIX ?= ""
 IMAGE_LINGUAS = ""
 # Do not pollute the initrd image with rootfs features
 IMAGE_FEATURES = ""
 #PACKAGE_INSTALL = ""
-PACKAGE_EXCLUDE = "\
-    x11 \
-    x11-base \
-    weston \
-    "
 IMAGE_LINGUAS = ""
 IMAGE_FSTYPES = "cpio.gz.u-boot"
 IMAGE_ROOTFS_SIZE = "8192"

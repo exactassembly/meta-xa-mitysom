@@ -1,0 +1,10 @@
+# short-description: Create an SD card image for the CL MitySOM 5CSE (Cyclone 5 SoC)
+# long-description: Create an SD card image for the CL MitySOM 5CSE (Cyclone 5 SoC)
+# UBootEnv (environment variables) are in the first partition (fixed offset right after 
+# MBR), u-Boot binary is located in the partition with type 0xA2, and the actual boot files 
+# which are loaded by u-boot are located in the third partition (VFAT)
+
+part --source empty --ondisk mmcblk --fixed-size 64k --label "uboot-env"
+part --source rawcopy --sourceparams="file=u-boot-with-spl.sfp" --ondisk mmcblk --system-id=a2 --align 1024 --fixed-size 10M
+part --source bootimg-partition --ondisk mmcblk --fstype=vfat --label boot --active --align 4 --size 256
+part --ondisk mmcblk --fstype=ext4 --label persistent --align 4 --size 128M
