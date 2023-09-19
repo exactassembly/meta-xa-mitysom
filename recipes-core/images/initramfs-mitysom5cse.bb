@@ -16,7 +16,7 @@ COMPATIBLE_MACHINE = "mitysom5cse"
 INITRAMFS_SCRIPTS += "\
     initramfs-framework-base \
     initramfs-module-udev \
-    initramfs-module-looproot \
+    initramfs-module-overlayfs \
     "
 
 VIRTUAL-RUNTIME_dev_manager ?= "busybox-mdev"

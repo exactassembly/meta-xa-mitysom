@@ -3,11 +3,11 @@
 # Author: ted@xassembly.com
 # Licensed on BSD-3
 
-looproot_enabled() {
+overlayfs_enabled() {
         return 0
 }
 
-looproot_run() {
+overlayfs_run() {
     MEDIADIR="/media"
     BOOTDIR="/boot"
     /bin/mkdir -p ${MEDIADIR}

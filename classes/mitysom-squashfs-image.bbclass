@@ -13,7 +13,7 @@ IMAGE_INSTALL = "\
     ${CORE_IMAGE_EXTRA_INSTALL} \
     "
 
-do_rootfs[depends] += "mitysom5cse-initramfs:do_image_complete"
+do_rootfs[depends] += "initramfs-mitysom5cse:do_image_complete"
 
 IMAGE_LINGUAS = " "
 
@@ -37,7 +37,9 @@ rootfs_tuning_boot() {
 
 IMAGE_ROOTFS_SIZE ?= "8192"
 IMAGE_ROOTFS_EXTRA_SPACE:append = "${@bb.utils.contains("DISTRO_FEATURES", "systemd", " + 4096", "" ,d)}"
-export IMAGE_BASENAME = "smeg-rootfs"
+export IMAGE_BASENAME = "application-rootfs"
+PROVIDES = "application-rootfs"
+
 IMAGE_FSTYPES = "squashfs"
 
 inherit core-image
