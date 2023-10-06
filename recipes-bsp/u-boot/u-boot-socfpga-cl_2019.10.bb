@@ -5,8 +5,11 @@ UBOOT_VERSION = "v2019.10"
 
 SRCREV = "964a62232a0216d196759a2a97ba4a4bea6fe982"
 
+UBOOT_ENV="u-boot-initrd-env"
+UBOOT_ENV_SUFFIX="scr"
+
 FILESEXTRAPATHS:prepend := "${THISDIR}/files-mitysom5cse:"
 SRC_URI += "file://001_add_mitysom5cse_l23y8.patch"
-SRC_URI += "file://initrd-squashfs-boot.txt"
+SRC_URI += "file://u-boot-initrd-env.cmd"
 SRC_URI += "file://003_use_default_env.cfg"
 
