@@ -1,15 +1,15 @@
-LICENSE = "BSD-3"
-LIC_FILES_CHKSUM = ""
+LICENSE = "BSD-3-Clause"
+LIC_FILES_CHKSUM = "file://75-overlayfs.sh;beginline=1;endline=4;md5=d13e1d7613e8081e0d5b9de5fd475cfc"
 PR="r0"
 
-inherit deploy
+inherit deploy allarch
 
 SRC_URI = "\
   file://75-overlayfs.sh \
 "
 
 DEPENDS += " \
-  initramfs-framework-base \
+  initramfs-framework \
 "
 
 RDEPENDS:${PN} = "\
