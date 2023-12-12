@@ -3,11 +3,11 @@
 # Author: ted@xassembly.com
 # Licensed on BSD-3
 
-looproot_enabled() {
+overlayfs_enabled() {
         return 0
 }
 
-looproot_run() {
+overlayfs_run() {
     MEDIADIR="/media"
     BOOTDIR="/boot"
     /bin/mkdir -p ${MEDIADIR}
@@ -49,8 +49,8 @@ looproot_run() {
     # mount the persistent data device, either from SDCard partition
     # or create a tempfs to allow read/write for the root partition
     PERSISTDIR="${MEDIADIR}/persist"
-    /bin/mkdir -p ${SQUASHDIR}
-    if [ -f "${bootparam_looppersistdev}" ]; then
+    /bin/mkdir -p ${PERSISTDIR}
+    if [ -b "${bootparam_looppersistdev}" ]; then
         debug "Using ${bootparam_looppersistdev} @ ${PERSISTDIR}"
         /bin/mount -n ${bootparam_looppersistdev} ${PERSISTDIR}
     else
@@ -71,5 +71,15 @@ looproot_run() {
     if [ ! -f ${ROOTFS_DIR}/etc/issue ]; then
         fatal "Found /etc/issue in ${ROOTFS_DIR}"
     fi
+
+    debug "Moving ro and rw root file system into overlay"
+    /bin/mkdir -p $ROOTFS_DIR/$SQUASHDIR $ROOTFS_DIR/$PERSISTDIR 
+    /bin/mount --move $SQUASHDIR ${ROOTFS_DIR}/$SQUASHDIR
+    /bin/mount --move $PERSISTDIR ${ROOTFS_DIR}/$PERSISTDIR
+
+    # move /boot into the overlayfs so that the user has access
+    /bin/mount --move $BOOTDIR ${ROOTFS_DIR}/$BOOTDIR
+
+
     debug "OverlayFS complete"
 }
