@@ -1,0 +1,265 @@
+diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
+index 8223c11c44..a4df077a63 100644
+--- a/arch/arm/dts/Makefile
++++ b/arch/arm/dts/Makefile
+@@ -373,6 +373,7 @@ dtb-$(CONFIG_ARCH_SOCFPGA) +=				\
+ 	socfpga_arria10_socdk_nand.dtb			\
+ 	socfpga_arria10_socdk_qspi.dtb			\
+ 	socfpga_arria10_socdk_sdmmc.dtb			\
++	socfpga_mitysom_a10s_dsc.dtb        \
+ 	socfpga_cyclone5_mcvevk.dtb			\
+ 	socfpga_cyclone5_is1.dtb			\
+ 	socfpga_cyclone5_socdk.dtb			\
+diff --git a/arch/arm/dts/socfpga_mitysom_a10s_dsc.dts b/arch/arm/dts/socfpga_mitysom_a10s_dsc.dts
+new file mode 100644
+index 0000000000..498819f8d3
+--- /dev/null
++++ b/arch/arm/dts/socfpga_mitysom_a10s_dsc.dts
+@@ -0,0 +1,188 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright (C) 2014-2015 Altera Corporation <www.altera.com>
++ */
++
++/dts-v1/;
++#include "socfpga_arria10.dtsi"
++#include  <dt-bindings/gpio/gpio.h>
++
++/ {
++	model = "Altera SOCFPGA Arria 10";
++	compatible = "altr,socfpga-arria10", "altr,socfpga";
++
++	aliases {
++		ethernet0 = &gmac1;
++		serial0 = &uart1;
++		mmc0 = &mmc;
++	};
++
++	chosen {
++		bootargs = "earlyprintk";
++		stdout-path = "serial0:115200n8";
++	};
++
++	memory@0 {
++		name = "memory";
++		device_type = "memory";
++		reg = <0x0 0x80000000>; /* 2GB */
++	};
++
++	soc {
++		clkmgr@ffd04000 {
++			clocks {
++				osc1 {
++					clock-frequency = <25000000>;
++				};
++			};
++		};
++	};
++};
++
++&gmac1 {
++	phy-mode = "rgmii";
++	phy-addr = <0xffffffff>; /* probe for phy addr */
++
++	snps,reset-gpio = <&porta 1 GPIO_ACTIVE_LOW>;
++	snps,reset-active-low;
++	snps,reset-delays-us = <10000 10000 1000000>;
++
++	max-frame-size = <3800>;
++	status = "okay";
++
++	mdio0 {
++			#address-cells = <1>;
++			#size-cells = <0>;
++			compatible = "snps,dwmac-mdio";
++			phy0: ethernet-phy@3 {
++					reg = <3>;
++
++					/*
++					* These skews assume the user's FPGA design is adding 600ps of delay
++					* for TX_CLK on Arria 10.
++					*
++					* All skews are offset since hardware skew values for the ksz9031
++					* range from a negative skew to a positive skew.
++					* See the micrel-ksz90x1.txt Documentation file for details.
++					*/
++					txd0-skew-ps = <0>; /* -420ps */
++					txd1-skew-ps = <0>; /* -420ps */
++					txd2-skew-ps = <0>; /* -420ps */
++					txd3-skew-ps = <0>; /* -420ps */
++					rxd0-skew-ps = <420>; /* 0ps */
++					rxd1-skew-ps = <420>; /* 0ps */
++					rxd2-skew-ps = <420>; /* 0ps */
++					rxd3-skew-ps = <420>; /* 0ps */
++					txen-skew-ps = <0>; /* -420ps */
++					txc-skew-ps = <1860>; /* 900ps */
++					rxdv-skew-ps = <420>; /* 0ps */
++					rxc-skew-ps = <1680>; /* 780ps */
++			};
++	};
++
++};
++
++&gpio0 {
++	status = "okay";
++};
++
++&gpio1 {
++	status = "okay";
++};
++
++&i2c0 {
++	status = "okay";
++
++	/* start at 100 KHz */
++	clock-frequency = <100000>;
++	/* TODO - not sure if we need to adjust these */
++	/* i2c-sda-falling-time-ns = <6000>; */
++	/* i2c-scl-falling-time-ns = <6000>; */
++
++	/* factory config EEPROM */
++	eeprom@50 {
++		compatible = "atmel,24c16";
++		reg = <0x50>;
++		pagesize = <16>;
++	};
++
++	/* On-board Abracon RTC (-2 production variants) */
++	rtc@32 {
++		compatible = "abracon,abmkt3";
++		reg = <0x32>;
++		/*
++			Temperature compensation interval
++			0 (Default) = 0.5 sec, 1 = 2 sec, 2 = 10 sec, 3 = 30 sec
++			temp-interval = <0>;
++		*/
++	};
++
++	/* OnBoard Temp Sensor (this may just get probed / detected) */
++	temp@18 {
++		compatible = "lm95235";
++		reg = <0x18>;
++		};
++
++	temp@48 {
++		compatible = "adi,ad7414";
++		reg = <0x48>;
++	};
++};
++
++&i2c1 {
++	status = "okay";
++
++	/*
++	 * adjust the falling times to decrease the i2c frequency to 50Khz
++	 * because the LCD module does not work at the standard 100Khz
++	 */
++	clock-frequency = <100000>;
++	/* i2c-sda-falling-time-ns = <6000>; */
++	/* i2c-scl-falling-time-ns = <6000>; */
++
++	eeprom@50 {
++		compatible = "atmel,24c32";
++		reg = <0x50>;
++		pagesize = <32>;
++	};
++
++};
++
++&i2c4 {
++	status = "okay";
++
++	/* start at 100 KHz */
++	clock-frequency = <100000>;
++};
++
++&uart1 {
++	status = "okay";
++};
++
++&usb1 {
++	status = "okay";
++};
++
++&watchdog1 {
++	status = "okay";
++};
++
++&mmc {
++	status = "okay";
++	cap-sd-highspeed;
++	cap-mmc-highspeed;
++	broken-cd;
++	bus-width = <4>;
++};
++
++&eccmgr {
++	sdmmca-ecc@ff8c2c00 {
++		compatible = "altr,socfpga-sdmmc-ecc";
++		reg = <0xff8c2c00 0x400>;
++		altr,ecc-parent = <&mmc>;
++		interrupts = <15 IRQ_TYPE_LEVEL_HIGH>,
++			     <47 IRQ_TYPE_LEVEL_HIGH>,
++			     <16 IRQ_TYPE_LEVEL_HIGH>,
++			     <48 IRQ_TYPE_LEVEL_HIGH>;
++	};
++};
+diff --git a/configs/socfpga_arria10_defconfig b/configs/socfpga_arria10_defconfig
+index f111076aac..1372310a85 100644
+--- a/configs/socfpga_arria10_defconfig
++++ b/configs/socfpga_arria10_defconfig
+@@ -8,7 +8,6 @@ CONFIG_SPL_DRIVERS_MISC_SUPPORT=y
+ CONFIG_TARGET_SOCFPGA_ARRIA10_SOCDK=y
+ CONFIG_IDENT_STRING="socfpga_arria10"
+ CONFIG_SPL_FS_FAT=y
+-CONFIG_DEFAULT_DEVICE_TREE="socfpga_arria10_socdk_sdmmc"
+ CONFIG_DISTRO_DEFAULTS=y
+ CONFIG_FIT=y
+ CONFIG_SPL_FIT=y
+@@ -16,10 +15,11 @@ CONFIG_SPL_FIT=y
+ CONFIG_USE_BOOTARGS=y
+ CONFIG_BOOTARGS="console=ttyS0,115200"
+ CONFIG_BOOTCOMMAND="run fatscript;run prog_core;bridge enable;run distro_bootcmd"
+-CONFIG_DEFAULT_FDT_FILE="socfpga_arria10_socdk_sdmmc.dtb"
+ CONFIG_SYS_CONSOLE_IS_IN_ENV=y
+ CONFIG_SYS_CONSOLE_OVERWRITE_ROUTINE=y
+ CONFIG_SYS_CONSOLE_ENV_OVERWRITE=y
++CONFIG_DEFAULT_FDT_FILE="socfpga_mitysom_a10s_dsc.dtb"
++CONFIG_VERSION_VARIABLE=y
+ CONFIG_DISPLAY_BOARDINFO_LATE=y
+ CONFIG_SPL_ENV_SUPPORT=y
+ CONFIG_SPL_FPGA=y
+@@ -33,10 +33,10 @@ CONFIG_CMD_USB=y
+ CONFIG_CMD_CACHE=y
+ CONFIG_CMD_EXT4_WRITE=y
+ CONFIG_MTDIDS_DEFAULT="nor0=ff705000.spi.0"
++CONFIG_DEFAULT_DEVICE_TREE="socfpga_mitysom_a10s_dsc"
+ CONFIG_OF_SPL_REMOVE_PROPS="interrupts interrupt-parent dmas dma-names"
+ CONFIG_ENV_IS_IN_MMC=y
+ CONFIG_SYS_RELOC_GD_ENV_ADDR=y
+-CONFIG_VERSION_VARIABLE=y
+ CONFIG_SPL_DM_SEQ_ALIAS=y
+ CONFIG_DWAPB_GPIO=y
+ CONFIG_FS_LOADER=y
+@@ -57,7 +57,17 @@ CONFIG_USB=y
+ CONFIG_DM_USB=y
+ CONFIG_USB_DWC2=y
+ # CONFIG_SPL_WDT is not set
+-CONFIG_USB=y
+-CONFIG_DM_USB=y
+-CONFIG_USB_DWC2=y
+ # CONFIG_USE_TINY_PRINTF is not set
++CONFIG_OF_CONTROL=y
++CONFIG_SI5338=y
++CONFIG_CMD_I2C=y
++CONFIG_I2C_EEPROM=y
++CONFIG_SYS_I2C_DW=y
++CONFIG_BLK=y
++CONFIG_SI5338_PROGRAM=y
++CONFIG_CMD_MEMTEST=y
++CONFIG_SYS_MEMTEST_START=0x21000000
++CONFIG_SYS_MEMTEST_END=0x22000000
++CONFIG_CLK_CCF=y
++CONFIG_SPL_I2C_SUPPORT=y
++CONFIG_SPL_FORCE_FPGA_PROGRAM=y
+\ No newline at end of file

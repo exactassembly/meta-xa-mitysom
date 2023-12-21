@@ -1,0 +1,42 @@
+baudrate=115200
+bootargs=console=ttyS0,115200 root=/dev/mmcblk0p3 rw rootwait
+bootcmd=run core_rbf_prog; run callscript; run mmcload;bridge enable; run initusb_eth; run mmcboot
+bootdelay=5
+bootimage=zImage
+bootimagesize=0x5F0000
+callscript=if fatload mmc 0:1 $fpgadata $scriptfile;then source $fpgadata;elseecho Optional boot script not found.Continuing to boot normally;fi;
+cff_devsel_partition=0:1
+core_rbf_prog=fatload mmc 0:1 ${fpgadata} ${rbfcoreimage}; fpga load 0 ${fpgadata} ${filesize}
+fdt_high=0x2000000
+fdtaddr=0x100
+fdtimage=mitysom_a10s_devkit.dtb
+fdtimagesize=0x7f00
+fpga=0
+fpgadata=0x2000000
+fpgadatasize=0x700000
+initusb_eth=mw.l ffc02904 202; mw.l ffc02900 202; mw.l ffc02900 000; sleep 1; mw.l ffc02900 202
+ksz9031-rgmii-clock-skew=0x3fc
+ksz9031-rgmii-ctrl-skew=0x70
+ksz9031-rgmii-rxd-skew=0x7777
+ksz9031-rgmii-txd-skew=0x0
+loadaddr=0x8000
+micrel-ksz9021-clk-skew=0xf0f0
+micrel-ksz9021-data-skew=0x0
+mmcboot=setenv bootargs "console=ttyS0,115200 root=${mmcroot} rw rootwait";bootz ${loadaddr} - ${fdtaddr}
+mmcload=mmc rescan;${mmcloadcmd} mmc 0:${mmcloadpart} ${loadaddr} ${bootimage};${mmcloadcmd} mmc 0:${mmcloadpart} ${fdtaddr} ${fdtimage}
+mmcloadcmd=fatload
+mmcloadpart=1
+mmcroot=/dev/mmcblk0p2
+netboot=dhcp ${bootimage};tftp ${fdtaddr} ${fdtimage} ; run ramboot
+ramboot=setenv bootargs console=ttyS0,115200 printk.time=1 debug mem=${fdt_high} lpj=3977216;fpgabr 1; bootz ${loadaddr} - ${fdtaddr}
+rbfcoreimage=mitysom_a10s.core.rbf
+rbftosdramaddr=0x40
+scriptfile=u-boot.scr
+set_initswstate=mw ${u-boot_swstate_reg} ${u-boot_image_valid}
+socfpga_legacy_reset_compat=1
+stderr=serial
+stdin=serial
+stdout=serial
+u-boot_image_valid=0x49535756
+u-boot_swstate_reg=0xffd0620c
+verify=y

@@ -1,0 +1,150 @@
+/*
+ * Copyright (C) 2018 Critical Link, LLC
+ *
+ * Author: Daniel Vincelette <dvincelette@criticallink.com>
+ *
+ * Based on socfpga_arria10_socdk.dtsi
+ * Copyright (C) 2015 Altera Corporation <www.altera.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ */
+#include "socfpga_arria10.dtsi"
+#include <dt-bindings/gpio/gpio.h>
+
+/ {
+	model = "Critical Link MitySOM-A10S";
+	compatible = "altr,socfpga-arria10", "altr,socfpga";
+
+	aliases {
+		serial0 = &uart1;
+	};
+
+	chosen {
+		bootargs = "earlyprintk";
+		stdout-path = "serial0:115200n8";
+	};
+
+	memory@0 {
+		name = "memory";
+		device_type = "memory";
+		reg = <0x0 0x40000000>;
+	};
+
+	soc {
+		clkmgr@ffd04000 {
+			clocks {
+				osc1 {
+					/* 50Mhz ARM Reference Clock */
+					clock-frequency = <50000000>;
+				};
+			};
+		};
+	};
+};
+
+
+&i2c0 {
+	status = "okay";
+
+	/* start at 100 KHz */
+	clock-frequency = <100000>;
+	/* TODO: Verify if skews are needed */
+	/* i2c-sda-falling-time-ns = <6000>; */
+	/* i2c-scl-falling-time-ns = <6000>; */
+
+	/* On-board Temp Sensor */
+	temp@18 {
+		compatible = "lm95235";
+		reg = <0x18>;
+	};
+
+	/* On-board Temp Sensor (AT30TS750A, which is backwards support for lm75) */
+	temp@48 {
+		compatible = "lm75";
+		reg = <0x48>;
+	};
+
+	/* Factory config EEPROM */
+	eeprom@50 {
+		compatible = "atmel,24c16";
+		reg = <0x50>;
+		pagesize = <16>;
+	};
+
+	/* On-board Power Monitor EM2140 */
+	pwmon@40 {
+		compatible = "intel,em21xx";
+		reg = <0x40>;
+	};
+
+	/* On-board Abracon RTC */
+	rtc@32 {
+		compatible = "abracon,abmkt3";
+		reg = <0x32>;
+		temp-interval = <0>;
+	};
+
+};
+
+&i2c4 {
+	status = "okay";
+	clock-frequency = <100000>;
+};
+
+/* Console port */
+&uart1 {
+	status = "okay";
+};
+
+/* On-board GPIO Controller 0 */
+&gpio0 {
+	status = "okay";
+};
+
+/* On-board USB 2.0 OTG PHY */
+&usb1 {
+	status = "okay";
+};
+&usbphy0 {
+	reset-gpios = <&porta 9 GPIO_ACTIVE_HIGH>; 
+};
+
+
+/* On-board watchdog */
+&watchdog1 {
+	status = "okay";
+};
+
+
+
+/* On-board micro-SD card */
+&mmc {
+	status = "okay";
+	num-slots = <1>;
+	cap-sd-highspeed;
+	broken-cd;
+	bus-width = <4>;
+};
+
+/* ECC for MMC card DMAs */
+&eccmgr {
+	sdmmca-ecc@ff8c2c00 {
+		compatible = "altr,socfpga-sdmmc-ecc";
+		reg = <0xff8c2c00 0x400>;
+		altr,ecc-parent = <&mmc>;
+		interrupts = <15 IRQ_TYPE_LEVEL_HIGH>,
+			     <47 IRQ_TYPE_LEVEL_HIGH>,
+			     <16 IRQ_TYPE_LEVEL_HIGH>,
+			     <48 IRQ_TYPE_LEVEL_HIGH>;
+	};
+};
+
