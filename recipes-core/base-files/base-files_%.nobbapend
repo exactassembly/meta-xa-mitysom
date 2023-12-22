@@ -1,1 +1,2 @@
-FILESEXTRAPATHS:prepend := "${THISDIR}/files-mitysom5cse:"
+FILESEXTRAPATHS:prepend:mitysom5cse := "${THISDIR}/files-mitysom5cse:"
+FILESEXTRAPATHS:prepend:mitysoma10s := "${THISDIR}/files-mitysom_a10s:"

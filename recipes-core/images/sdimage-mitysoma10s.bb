@@ -1,0 +1,40 @@
+SUMMARY = "MitySOMA10S bootable SDCard image"
+
+IMAGE_INSTALL = " "
+PACKAGE_INSTALL = " "
+
+IMAGE_FEATURES = " "
+
+IMAGE_LINGUAS = " "
+
+LICENSE = "MIT"
+
+inherit core-image
+
+APPLICATION_NAME ?= "empty-application"
+APPLICATION_RECIPE := "${APPLICATION_NAME}-image"
+APPLICATION_IMAGE_FILE := "application-rootfs-mitysoma10s.squashfs"
+SOCFPGA_MITYSOMA10S_INITRAMFS_IMAGE ?= "initramfs-mitysoma10s"
+SOCFPGA_MITYSOMA10S_CORE_BITSTREAM ?= "mitysom_a10s.core.rbf"
+SOCFPGA_MITYSOMA10S_PERIPH_BITSTREAM ?= "mitysom_a10s.periph.rbf"
+SOCFPGA_MITYSOMA10S_FIT_IMG ?= "fit_spl_fpga.itb"
+
+DEPENDS+=" \
+    ${PREFERRED_PROVIDER_virtual/bootloader} \
+    ${SOCFPGA_MITYSOMA10S_INITRAMFS_IMAGE} \
+    ${APPLICATION_RECIPE} \
+    "
+
+IMAGE_ROOTFS_SIZE = "262144"
+export IMAGE_BASENAME = "sdimage-mitysoma10s"
+IMAGE_FSTYPES = "wic"
+WKS_FILE = "sdimage-mitysoma10s.wks"
+
+IMAGE_BOOT_FILES += " \
+	${SOCFPGA_MITYSOMA10S_INITRAMFS_IMAGE}.cpio.gz.u-boot \
+    ${APPLICATION_IMAGE_FILE} \
+    ${SOCFPGA_MITYSOMA10S_CORE_BITSTREAM} \
+    ${SOCFPGA_MITYSOMA10S_PERIPH_BITSTREAM} \
+    ${SOCFPGA_MITYSOMA10S_FIT_IMG} \
+    "
+
