@@ -21,7 +21,7 @@ loadaddr=0x02000000
 micrel-ksz9021-clk-skew=0xf0f0
 micrel-ksz9021-data-skew=0x0
 mmcboot=setenv bootargs "console=ttyS0,115200 debug rdinit=/init root=/dev/ram mem=504M loopimgdev=/dev/mmcblk0p1 loopimgfile=${loopimgfile} looppersistdev=${looppersistdev} rw rootwait";bootz ${loadaddr} ${initramfsaddr} ${fdtaddr}
-mmcload=mmc rescan;${mmcloadcmd} mmc 0:${mmcloadpart} ${loadaddr} ${bootimage};${mmcloadcmd} mmc 0:${mmcloadpart} ${fdtaddr} ${fdtimage};${mmcloadcmd} mmc 0:${mmcloadpart} ${initramfsaddr} ${initramfsfile}
+mmcload=mmc rescan;${mmcloadcmd} mmc 0:${mmcloadpart} ${loadaddr} ${bootimage};run fdtload;${mmcloadcmd} mmc 0:${mmcloadpart} ${fdtaddr} ${fdtimage};${mmcloadcmd} mmc 0:${mmcloadpart} ${initramfsaddr} ${initramfsfile}
 mmcloadcmd=fatload
 mmcloadpart=1
 mmcroot=/dev/mmcblk0p3
@@ -38,3 +38,6 @@ socfpga_legacy_reset_compat=1
 stderr=serial
 stdin=serial
 stdout=serial
+user_devicetree=user_devicetree.dtb
+default_devicetree=mitysom_a10s_devkit.dtb
+fdtload=if test -e mmc 0:${mmcloadpart} ${user_devicetree}; then setenv fdtimage ${user_devicetree}; else setenv fdtimage ${default_devicetree}; fi
