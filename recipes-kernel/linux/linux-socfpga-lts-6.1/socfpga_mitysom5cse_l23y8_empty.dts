@@ -1,0 +1,3 @@
+#include "socfpga_mitysom5cse_l23y8.dtsi"
+
+// no functionality in the FPGA gates

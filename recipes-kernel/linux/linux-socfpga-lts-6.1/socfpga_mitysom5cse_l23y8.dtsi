@@ -1,0 +1,52 @@
+#include "socfpga_mitysom5cse.dtsi"
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+#include <dt-bindings/leds/common.h>
+
+/ {
+	aliases {
+		/* this allow the ethaddr uboot environmnet variable contents
+		 * to be added to the gmac1 device tree blob.
+		 */
+		ethernet0 = &gmac1;
+	};
+};
+
+&mmc {
+	status = "okay";
+	num-slots = <1>;
+	broken-cd;
+	cap-mmc-highspeed;
+	cap-sd-highspeed;
+	altr,dw-mshc-ciu-div = <3>;
+	altr,dw-mshc-sdr-timing = <0 3>;
+	bus-width = <4>;
+};
+
+// disable GMAC0 (not accessible over MitySOM connector)
+&gmac0 {
+	status = "disabled";
+};
+
+// enable GMAC 1 with external MDIO device (ex: VSC8541)
+&gmac1 {
+	status = "okay";
+    phy-mode = "rgmii";
+    max-frame-size = <3800>;
+	phy-addr = <0xffffffff>; /* probe for phy addr */
+
+	clocks = <&emac_1_clk>, <&osc1>;
+	clock-names = "stmmaceth", "ptp_ref";
+
+    snps,reset-delays-us = <0 10000 10000>;
+    snps,reset-gpio = <&porta 28 1>;
+    snps,reset-active-low;
+
+    mdio0: mdio@ff702000 {
+       	#address-cells = <1>;
+		#size-cells = <0>;
+	    compatible = "snps,dwmac-mdio";
+	};
+};
+
+
