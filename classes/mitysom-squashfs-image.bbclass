@@ -8,12 +8,10 @@
 LICENSE = "BSD-3"
 
 IMAGE_INSTALL = "\
-    ${CORE_IMAGE_BASE_INSTALL} \
+    packagegroup-core-boot \
     kernel-modules \
     ${CORE_IMAGE_EXTRA_INSTALL} \
     "
-
-do_rootfs[depends] += "mitysom5cse-initramfs:do_image_complete"
 
 IMAGE_LINGUAS = " "
 
@@ -21,11 +19,11 @@ IMAGE_LINGUAS = " "
 # be doing runtime things during the build that execute with ARM binaries)
 DEPENDS="qemuwrapper-cross"
 
-ROOTFS_POSTPROCESS_COMMAND_mitysom5cse += " rootfs_tuning_boot;"
+ROOTFS_POSTPROCESS_COMMAND += " rootfs_tuning_boot;"
 
 rootfs_tuning_boot() {
     # make it clear this is the squahfs
-    echo "SMEG Module SquashFS" >> ${IMAGE_ROOTFS}/etc/issue
+    echo "Base SquashFS" >> ${IMAGE_ROOTFS}/etc/issue
     # we dont want another copy of the bzImage boot file in here
     # plus the /boot directory will be hidden when we mount the real
     # EFI boot partition
@@ -37,7 +35,7 @@ rootfs_tuning_boot() {
 
 IMAGE_ROOTFS_SIZE ?= "8192"
 IMAGE_ROOTFS_EXTRA_SPACE:append = "${@bb.utils.contains("DISTRO_FEATURES", "systemd", " + 4096", "" ,d)}"
-export IMAGE_BASENAME = "smeg-rootfs"
+export IMAGE_BASENAME = "application-rootfs"
 IMAGE_FSTYPES = "squashfs"
 
 inherit core-image
