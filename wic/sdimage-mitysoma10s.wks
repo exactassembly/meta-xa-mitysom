@@ -3,9 +3,10 @@
 # Boot files are located in the first vfat partition and u-Boot is located in
 # the third partition.
 
-part --source bootimg-partition --ondisk mmcblk --fstype=vfat --label boot --active --align 4 --size 256
+part --source bootimg-partition --ondisk mmcblk --fstype=vfat --label boot --active --align 4 --size 512M
 part --source rawcopy --sourceparams="file=u-boot-splx4.sfp" --ondisk mmcblk --system-id=a2 --align 1024 --fixed-size 10M
-part --ondisk mmcblk --fstype=ext4 --label persistent --align 4 --size 128M
+part --ondisk mmcblk --fstype=ext4 --label persistent --align 4 --size 5632M
+part --ondisk mmcblk --size 44 --label swap --fstype=swap --size=1024M --overhead-factor 1
 
 
 #part --source bootimg-partition --ondisk mmcblk --fstype=vfat --mkfs-extraopts "-F 32" --label boot --active --align 1024 --fixed-size 500M --system-id b
