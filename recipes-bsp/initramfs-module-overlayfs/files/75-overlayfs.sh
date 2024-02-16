@@ -28,12 +28,81 @@ overlayfs_run() {
         if [ ! -f ${BOOTDIR}/${bootparam_loopimgfile} ]; then
             # retry if mount doesnt work
             debug "Re-try Mounting boot partition '${bootparam_loopimgdev}' @ ${BOOTDIR}"
+            /bin/unmount ${BOOTDIR}
             /bin/sleep 1
             /bin/mount ${bootparam_loopimgdev} ${BOOTDIR}
         fi
     else
         debug "Boot partition already mounted"
     fi
+
+    UPGRADEDIR="${BOOTDIR}/upgrade"
+    /bin/mkdir -p ${UPGRADEDIR}
+    FAILEDDIR="${BOOTDIR}/failed"
+    /bin/mkdir -p ${FAILEDDIR}
+    BACKUPDIR="${BOOTDIR}/backup"
+    /bin/mkdir -p ${BACKUPDIR}
+
+    UPGRADESTAMP="${BOOTDIR}/UPGRADE-IN-PROGRESS"
+    ROLLBACKSTAMP="${BOOTDIR}/ROLLBACK"
+    OLDIMGFILE="${bootparam_loopimgfile}.old"
+
+    BOOTIMGFILE="${BOOTDIR}/${bootparam_loopimgfile}"
+    UPGRADEIMGFILE="${UPGRADEDIR}/${bootparam_loopimgfile}"
+    BACKUPIMGFILE="${BACKUPDIR}/${bootparam_loopimgfile}"
+
+    if [ -f ${UPGRADEIMGFILE} ]; then
+        debug "Found upgrade img: ${UPGRADEIMGFILE} ... attempting upgrade"
+        
+        if [ ! -f ${ROLLBACKSTAMP} ]; then
+        
+            /bin/touch $UPGRADESTAMP
+
+            if [ -f ${BACKUPIMGFILE} ]; then
+                debug "Found existing backup img: ${BACKUPIMGFILE} ... marking as old"
+                /bin/mv $BACKUPIMGFILE ${BACKUPDIR}/${OLDIMGFILE}
+            fi
+
+            if [ -f ${BOOTIMGFILE} ]; then
+                debug "Found existing boot img: ${BOOTIMGFILE} ... moving to backup"
+                /bin/mv $BOOTIMGFILE $BACKUPDIR
+            fi
+
+            debug "Moving upgrade img to boot img location"
+            /bin/mv $UPGRADEIMGFILE $BOOTDIR
+
+        else
+
+            msg "SquashFS: CONFLICT: Rollback stamp ${ROLLBACKSTAMP} and Upgrade img ${UPGRADEIMGFILE} both exist... ignoring both and booting normally"
+            /bin/echo "Both ${ROLLBACKSTAMP} and ${UPGRADEIMGFILE} existed and were ignored, please remove one..." > ${FAILEDDIR}/failed
+
+        fi
+    
+    else
+        # if there's not an upgrade file, and there is a ROLLBACKSTAMP, try to rollback
+        if [ -f ${ROLLBACKSTAMP} ]; then
+            debug "Found Rollback stamp ${ROLLBACKSTAMP} ... attempting to rollback img"
+
+            if [ -f ${BACKUPIMGFILE} ]; then
+                debug "Found backup img ${BACKUPIMGFILE} ... rolling back to backup img"
+                /bin/mv $BACKUPIMGFILE $BOOTDIR
+
+                if [ -f ${BACKUPDIR}/${OLDIMGFILE} ]; then
+                    debug "Found old backup img ${BACKUPDIR}/${OLDIMGFILE} ... setting old img as backup"
+                    /bin/mv ${BACKUPDIR}/${OLDIMGFILE} $BACKUPIMGFILE
+                fi
+
+                debug "Successfully rolled back img ... deleting rollback stamp ${ROLLBACKSTAMP}"
+                /bin/rm $ROLLBACKSTAMP
+
+            else
+                msg "SquashFS: MISSING FILE: found rollback stamp @ ${ROLLBACKSTAMP} but found no backup img in ${BACKUPDIR} ... booting as normal -- check /boot/fatal"
+                /bin/echo "Found rollback stamp ${ROLLBACKSTAMP} but not backup img ${BACKUPIMGFILE}" > ${FAILEDDIR}/failed
+            fi
+        fi 
+
+    fi
+
 
     if [ ! -f ${BOOTDIR}/${bootparam_loopimgfile} ]; then
         debug "Failed to find ${BOOTDIR}/${bootparam_loopimgfile}"
