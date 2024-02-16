@@ -20,7 +20,7 @@ ksz9031-rgmii-txd-skew=0x0
 loadaddr=0x02000000
 micrel-ksz9021-clk-skew=0xf0f0
 micrel-ksz9021-data-skew=0x0
-mmcboot=setenv bootargs "console=ttyS0,115200 debug rdinit=/init root=/dev/ram mem=504M loopimgdev=/dev/mmcblk0p1 loopimgfile=${loopimgfile} looppersistdev=${looppersistdev} rw rootwait";bootz ${loadaddr} ${initramfsaddr} ${fdtaddr}
+mmcboot=setenv bootargs "console=ttyS0,115200 debug rdinit=/init root=/dev/ram loopimgdev=/dev/mmcblk0p1 loopimgfile=${loopimgfile} looppersistdev=${looppersistdev} rw rootwait";bootz ${loadaddr} ${initramfsaddr} ${fdtaddr}
 mmcload=mmc rescan;${mmcloadcmd} mmc 0:${mmcloadpart} ${loadaddr} ${bootimage};run fdtload;${mmcloadcmd} mmc 0:${mmcloadpart} ${fdtaddr} ${fdtimage};${mmcloadcmd} mmc 0:${mmcloadpart} ${initramfsaddr} ${initramfsfile}
 mmcloadcmd=fatload
 mmcloadpart=1
