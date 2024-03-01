@@ -24,4 +24,4 @@ looppersistdev=/dev/mmcblk0p4
 mmcloadpart=3
 mmcloadcmd=fatload
 mmcload=mmc rescan;${mmcloadcmd} mmc 0:${mmcloadpart} ${loadaddr} ${bootimage};${mmcloadcmd} mmc 0:${mmcloadpart} ${fdt_addr_r} ${fdtimage};${mmcloadcmd} mmc 0:${mmcloadpart} ${initramfsaddr} ${initramfsfile}
-mmcboot=setenv bootargs "console=ttyS0,115200 debug rdinit=/init root=/dev/ram mem=504M loopimgdev=/dev/mmcblk0p3 loopimgfile=${loopimgfile} looppersistdev=${looppersistdev}"; bootz ${loadaddr} ${initramfsaddr} ${fdt_addr_r}
+mmcboot=setenv bootargs "console=ttyS0,115200 debug rdinit=/init root=/dev/ram loopimgdev=/dev/mmcblk0p3 loopimgfile=${loopimgfile} looppersistdev=${looppersistdev}"; bootz ${loadaddr} ${initramfsaddr} ${fdt_addr_r}
